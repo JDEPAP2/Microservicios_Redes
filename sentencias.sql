@@ -9,6 +9,9 @@ CREATE TABLE usuarios (
     PRIMARY KEY (id_usuario)
 );
 
+INSERT INTO usuarios (nombre_completo, usuario, password, rol)
+VALUES ('Administrador General', 'admin', 'admin123', 'administrador');
+
 CREATE DATABASE paquetesDB;
 USE paquetesDB;
 CREATE TABLE paquetes (

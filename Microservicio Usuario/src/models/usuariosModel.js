@@ -9,6 +9,12 @@ async function validarUsuario(usuario, password) {
   return rows;
 }
 
+async function obtenerUsuarios() {
+  const [rows] = await connection.query(
+    'SELECT * FROM usuarios');
+  return rows;
+}
+
 async function obtenerUsuarioPorId(id) {
   const [rows] = await connection.query(
     'SELECT id_usuario, rol FROM usuarios WHERE id_usuario = ?',
@@ -26,15 +32,16 @@ async function obtenerUsuarioPorNombre(usuario) {
 }
 
 async function crearUsuario(nombre_completo, usuario, password, rol) {
-  const result = await connection.query(
+  await connection.query(
     'INSERT INTO usuarios (nombre_completo, usuario, password, rol) VALUES (?, ?, ?, ?)',
     [nombre_completo, usuario, password, rol]
   );
-  return result;
+  return (await obtenerUsuarioPorNombre(usuario))[0].id_usuario
 }
 
 module.exports = {
   validarUsuario,
+  obtenerUsuarios,
   obtenerUsuarioPorId,
   obtenerUsuarioPorNombre,
   crearUsuario

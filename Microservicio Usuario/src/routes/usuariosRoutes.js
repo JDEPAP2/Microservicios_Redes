@@ -6,6 +6,7 @@ const verificarAdministrador = require('../middlewares/verificarAdministrador');
 router.post('/login', usuariosController.login);
 router.get('/id/:id', usuariosController.obtenerUsuario);
 router.get('/:usuario', usuariosController.obtenerUsuarioPorNombre);
+router.get('/', usuariosController.obtenerUsuarios);
 router.post('/', verificarAdministrador, usuariosController.crearUsuario);
 
 module.exports = router;

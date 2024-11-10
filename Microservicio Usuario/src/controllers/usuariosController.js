@@ -15,6 +15,20 @@ async function login(req, res) {
   }
 }
 
+async function obtenerUsuarios(req, res) {
+  try {
+    const usuarios = await usuariosModel.obtenerUsuarios();
+    if (usuarios?.length > 0) {
+      res.json(usuarios);
+    } else {
+      res.status(404).json({ error: 'No hay usuarios' });
+    }
+  } catch (error) {
+    console.error('Error al obtener usuarios', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+}
+
 async function obtenerUsuario(req, res) {
   const usuario = req.params.id;
   try {
@@ -49,11 +63,16 @@ async function crearUsuario(req, res) {
   const { nombre_completo, nuevo_usuario, nuevo_password, nuevo_rol } = req.body;
   try {
     const usuarioExistente = await usuariosModel.obtenerUsuarioPorNombre(nuevo_usuario);
-    if (usuarioExistente.length > 0) {
-      return res.status(400).json({ error: 'El usuario ya existe' });
+    if(nuevo_rol == "cliente" || nuevo_rol == "administrador" ){
+      if (usuarioExistente.length > 0) {
+        return res.status(400).json({ error: 'El usuario ya existe' });
+      }
+      var id_usuario = await usuariosModel.crearUsuario(nombre_completo, nuevo_usuario, nuevo_password, nuevo_rol);
+      res.status(201).json({ mensaje: 'Usuario creado exitosamente', id_usuario });
+    }else{
+      return res.status(400).json({ error: 'Rol Invalido' });
     }
-    await usuariosModel.crearUsuario(nombre_completo, nuevo_usuario, nuevo_password, nuevo_rol);
-    res.status(201).json({ mensaje: 'Usuario creado exitosamente' });
+    
   } catch (error) {
     console.error('Error al crear usuario:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -63,6 +82,7 @@ async function crearUsuario(req, res) {
 module.exports = {
   login,
   obtenerUsuario,
+  obtenerUsuarios,
   obtenerUsuarioPorNombre,
   crearUsuario,
 };

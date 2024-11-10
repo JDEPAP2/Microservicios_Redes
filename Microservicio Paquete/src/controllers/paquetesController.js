@@ -16,7 +16,8 @@ async function crearPaquete(req, res) {
         id_paquete: paquete.id_paquete,
         id_usuario,
         estado : "creado",
-        fecha_hora: new Date()
+        fecha_hora: new Date().toISOString().slice(0, 19).replace('T', ' ')
+
       });
 
       mensaje += " y notificación enviada"
@@ -115,7 +116,7 @@ async function actualizarEstadoPaquete(req, res) {
           id_paquete,
           id_usuario: paquete?.id_usuario,
           estado: nuevo_estado,
-          fecha_hora: new Date()
+          fecha_hora: new Date().toISOString().slice(0, 19).replace('T', ' ')
         });
         mensaje += " y notificación enviada";
       } catch (error) {
