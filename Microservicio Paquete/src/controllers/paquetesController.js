@@ -82,14 +82,14 @@ async function obtenerPaquetesPorNombreUsuario(req, res) {
     isAdmin = await usuariosService.validarUsuario(id_investigador);
   } catch (error) {}
   
-  if(!isAdmin){
-    res.status(403).json({ mensaje: 'No tienes permisos para ver los paquetes de otro usuario' });
-    return;
-  }
-
   try {
     const id_usuario = (await usuariosService.obtenerIdUsuarioPorNombre(nombre_usuario));
     const paquetes = await paquetesModel.obtenerPaquetesPorUsuario(id_usuario);
+
+    if(id_investigador !== `${id_usuario}` && !isAdmin){
+      res.status(403).json({ mensaje: 'No tienes permisos para ver los paquetes de otro usuario' });
+      return;
+    }
 
     if (paquetes.length > 0) {
       const paquetesConNotificaciones = await Promise.all(paquetes.map(async (paquete) => {
