@@ -36,12 +36,34 @@ async function crearPaquete(req, res) {
 
 async function obtenerPaquetesPorIdUsuario(req, res) {
   const id_usuario = req.params.id_usuario;
+  const id_investigador = req.headers?.id_investigador;
+  var is_admin = false;
+
+  try {
+    is_admin = await usuariosService.validarUsuario(id_investigador);
+  } catch (error) {}
+
+
+  if(id_investigador !== id_usuario && !is_admin){
+    res.status(403).json({ mensaje: 'No tienes permisos para ver los paquetes de otro usuario' });
+    return;
+  }
 
   try {
     const paquetes = await paquetesModel.obtenerPaquetesPorUsuario(id_usuario);
 
     if (paquetes.length > 0) {
-      res.json(paquetes);
+      const paquetesConNotificaciones = await Promise.all(paquetes.map(async (paquete) => {
+        let notificaciones = [];
+        try {
+          notificaciones = await notificacionesService.obtenerNotificacionesPorPaquete(paquete.id_paquete);
+        } catch (error) {
+          return { paquete };
+        }
+        return { paquete, notificaciones };
+      }));
+  
+      res.json(paquetesConNotificaciones);
     } else {
       res.status(404).json({ mensaje: 'No se encontraron paquetes para el usuario' });
     }
@@ -53,13 +75,34 @@ async function obtenerPaquetesPorIdUsuario(req, res) {
 
 async function obtenerPaquetesPorNombreUsuario(req, res) {
   const nombre_usuario = req.params.nombre_usuario;
+  const id_investigador = req.headers?.id_investigador;
+  var isAdmin = false;
+
+  try {
+    isAdmin = await usuariosService.validarUsuario(id_investigador);
+  } catch (error) {}
+  
+  if(!isAdmin){
+    res.status(403).json({ mensaje: 'No tienes permisos para ver los paquetes de otro usuario' });
+    return;
+  }
 
   try {
     const id_usuario = (await usuariosService.obtenerIdUsuarioPorNombre(nombre_usuario));
     const paquetes = await paquetesModel.obtenerPaquetesPorUsuario(id_usuario);
 
     if (paquetes.length > 0) {
-      res.json(paquetes);
+      const paquetesConNotificaciones = await Promise.all(paquetes.map(async (paquete) => {
+        let notificaciones = [];
+        try {
+          notificaciones = await notificacionesService.obtenerNotificacionesPorPaquete(paquete.id_paquete);
+        } catch (error) {
+          return { paquete };
+        }
+        return { paquete, notificaciones };
+      }));
+  
+      res.json(paquetesConNotificaciones);
     } else {
       res.status(404).json({ mensaje: 'No se encontraron paquetes para el usuario' });
     }
@@ -71,9 +114,20 @@ async function obtenerPaquetesPorNombreUsuario(req, res) {
 
 async function obtenerPaquetePorId(req, res) {
   const id_paquete = req.params.id_paquete;
+  const id_investigador = req.headers?.id_investigador;
+  var is_admin = false;
+
+  try {
+    is_admin = await usuariosService.validarUsuario(id_investigador);
+  } catch (error) {}
 
   try {
     const paquete = await paquetesModel.obtenerPaquetePorId(id_paquete);
+
+    if(id_investigador != paquete.id_usuario && !is_admin){
+      res.status(403).json({ mensaje: 'No tienes permisos para ver los paquetes de otro usuario' });
+      return;
+    }
 
     var notificaciones = [];
     if (paquete) {
@@ -91,7 +145,8 @@ async function obtenerPaquetePorId(req, res) {
 }
 
 async function actualizarEstadoPaquete(req, res) {
-  const { nuevo_estado, id_usuario, id_actualizador, id_paquete } = req.body;
+  const {id_actualizador } = req.headers;
+  const { nuevo_estado, id_paquete } = req.body;
 
   if (!ESTADOS_PERMITIDOS.includes(nuevo_estado)) {
     return res.status(400).json({ error: 'Estado no válido' });

@@ -1,7 +1,7 @@
 const usuariosModel = require('../models/usuariosModel');
 
 async function verificarAdministrador(req, res, next) {
-  const { usuario, password } = req.body;
+  const { usuario, password } = req.headers;
 
   try {
     const result = await usuariosModel.validarUsuario(usuario, password);
