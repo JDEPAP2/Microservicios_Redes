@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -10,6 +11,7 @@ app.use(express.json());
 
 app.use('/notificaciones', notificacionesRoutes);
 
-app.listen(3003, () => {
-  console.log(`Microservicio Notificaciones ejecutándose en el puerto 3003`);
+const PORT = process.env.DB_NOTIFICACIONES_PORT || 3003;
+app.listen(PORT, () => {
+  console.log(`Microservicio Notificaciones ejecutándose en el puerto ${PORT}`);
 });

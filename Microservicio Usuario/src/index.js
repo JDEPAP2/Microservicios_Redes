@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -10,6 +11,7 @@ app.use(express.json());
 
 app.use('/usuarios', userRoutes);
 
-app.listen(3001, () => {
-  console.log('Microservicio Usuarios ejecutándose en el puerto 3001');
+const PORT = process.env.DB_USUARIOS_PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Microservicio Usuarios ejecutándose en el puerto ${PORT}`);
 });
